@@ -1,0 +1,46 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environments
+venv/
+env/
+rag_env/
+.rag_env/
+
+# Environment variable files
+.env
+.env.*
+
+# IDE/editor stuff
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Uploads and user files
+uploads/
+*.log
+
+# Database
+*.sqlite3
+users.db
+
+# Docker
+*.pid
+*.sock
+*.tar
+docker-compose.override.yml
+
+# FAISS vector store
+vectorstores/
+data/
+*.pkl
+*.index

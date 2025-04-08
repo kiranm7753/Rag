@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>📚 PDF Chatbot</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f7f9;
+      margin: 0;
+      padding: 0;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      background: #1e1e1e;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+    }
+
+    body.dark .container {
+      background: #2a2a2a;
+      color: white;
+    }
+
+    #topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    #status-message {
+      margin-bottom: 1rem;
+      font-weight: 500;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    #chat-box {
+      height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 1rem;
+      border-radius: 8px;
+      background: #fafafa;
+      margin-bottom: 1rem;
+    }
+
+    body.dark #chat-box {
+      background: #1e1e1e;
+      border-color: #444;
+    }
+
+    .message {
+      margin: 0.75rem 0;
+      position: relative;
+    }
+
+    .timestamp {
+      font-size: 0.75rem;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    body.dark .timestamp {
+      color: #bbb;
+    }
+
+    .user {
+      background: #e0f7fa;
+      padding: 0.6rem;
+      border-radius: 8px;
+      max-width: 75%;
+      margin-left: auto;
+      text-align: right;
+    }
+
+    body.dark .user {
+      background: #005e73;
+      color: white;
+    }
+
+    .bot {
+      background: #fff3e0;
+      padding: 0.6rem;
+      border-radius: 8px;
+      max-width: 75%;
+      margin-right: auto;
+      text-align: left;
+    }
+
+    body.dark .bot {
+      background: #4b3600;
+      color: white;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    #query {
+      flex: 1;
+      padding: 0.6rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .upload-form {
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .reset-btn {
+      background: #dc3545;
+      margin-left: 1rem;
+    }
+
+    .reset-btn:hover {
+      background: #a71d2a;
+    }
+
+    #loading-indicator {
+      display: none;
+      font-style: italic;
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    #dark-toggle {
+      position: absolute;
+      top: 1rem;
+      right: 2rem;
+    }
+
+    .logout-link {
+      text-decoration: none;
+      color: #007bff;
+      margin-left: 1rem;
+      font-weight: 500;
+    }
+    .reset-btn-1 {
+      background: #6c757d;
+      margin-left: 0.5rem;
+    }
+    
+    .reset-btn-1:hover {
+      background: #5a6268;
+    }
+    .spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 3px solid #ccc;
+      border-top-color: #007bff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    
+  </style>
+</head>
+<body>
+  <div id="dark-toggle">
+    <label>
+      <input type="checkbox" id="dark-mode-toggle" />
+      🌙 Dark Mode
+    </label>
+  </div>
+
+  <div class="container">
+    <div id="topbar">
+      <h2>📄 Chat with Your PDFs</h2>
+      <div>
+        👋 Logged in as: <strong>{{ user.email }}</strong>
+        <a href="/logout" class="logout-link">Logout</a>
+      </div>
+    </div>
+
+    <div id="status-message"></div>
+
+    <form id="upload-form" class="upload-form" enctype="multipart/form-data">
+      <input type="file" name="files" id="pdf-files" multiple />
+      <button type="submit" id="upload-btn">Upload PDFs</button>
+      <button type="button" class="reset-btn" onclick="resetUploads()">Reset</button>
+    </form>
+
+    <div id="chat-box"></div>
+
+    <div class="input-area">
+      <input type="text" id="query" placeholder="Type your question..." />
+      <button onclick="askQuestion()">Ask</button>
+      <button type="button" class="reset-btn-1" onclick="clearChat()">Clear Chat</button>
+      <span id="loading-indicator" class="spinner"></span>
+    </div>
+  </div>
+
+  <script>
+    function getTimeStamp() {
+      const now = new Date();
+      return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function showStatus(message, color = "green") {
+      const statusEl = document.getElementById("status-message");
+      statusEl.innerText = message;
+      statusEl.style.color = color;
+      setTimeout(() => {
+        statusEl.innerText = "";
+      }, 4000);
+    }
+
+    function addMessage(type, text) {
+      const chatBox = document.getElementById("chat-box");
+      const timestamp = `<div class='timestamp'>${getTimeStamp()}</div>`;
+      chatBox.innerHTML += `<div class='message ${type}'>${text}${timestamp}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function askQuestion() {
+      const query = document.getElementById("query").value;
+      if (!query) {
+        showStatus("⚠️ Please type a question.", "red");
+        return;
+      }
+
+      const loading = document.getElementById("loading-indicator");
+      loading.style.display = "inline-block";
+
+      addMessage("user", query);
+      document.getElementById("query").value = "";
+
+      const res = await fetch("/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query })
+      });
+
+      const data = await res.json();
+      loading.style.display = "none";
+
+      if (data.answer) {
+        addMessage("bot", data.answer);
+      } else {
+        addMessage("bot", "❌ Error: " + (data.error || "Something went wrong"));
+      }
+    }
+
+    document.getElementById("upload-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const fileInput = document.getElementById("pdf-files");
+      const uploadBtn = document.getElementById("upload-btn");
+
+      if (fileInput.files.length === 0) {
+        showStatus("⚠️ Please select at least one PDF to upload.", "red");
+        return;
+      }
+
+      const formData = new FormData(e.target);
+      uploadBtn.disabled = true;
+      uploadBtn.innerText = "Uploading...";
+      uploadBtn.style.opacity = "0.6";
+      uploadBtn.style.cursor = "not-allowed";
+
+      try {
+        const res = await fetch("/upload", { method: "POST", body: formData });
+        const result = await res.json();
+
+        uploadBtn.disabled = false;
+        uploadBtn.innerText = "Upload PDFs";
+        uploadBtn.style.opacity = "1";
+        uploadBtn.style.cursor = "pointer";
+
+        if (!res.ok || result.message.includes("not a PDF")) {
+          showStatus("❌ " + (result.message || "Upload failed."), "red");
+          return;
+        }
+
+        if (result.user_id) {
+          showStatus(result.message + " You can now ask questions.");
+          addMessage("bot", "✅ PDFs uploaded and indexed. Ready to answer your questions!");
+        }
+      } catch (err) {
+        console.error(err);
+        uploadBtn.disabled = false;
+        showStatus("❌ Upload failed. Check console.", "red");
+      }
+    });
+
+    async function resetUploads() {
+      const confirmed = confirm("⚠️ This will delete all uploaded PDFs and reset the index. Proceed?");
+      if (!confirmed) return;
+
+      const res = await fetch("/reset", { method: "POST" });
+      const data = await res.json();
+
+      document.getElementById("chat-box").innerHTML = "";
+      showStatus(data.message, "red");
+    }
+
+    window.onload = () => {
+      document.getElementById("query").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          askQuestion();
+        }
+      });
+
+      const toggle = document.getElementById("dark-mode-toggle");
+      toggle.addEventListener("change", () => {
+        document.body.classList.toggle("dark", toggle.checked);
+      });
+    };
+    function clearChat() {
+      const confirmed = confirm("Are you sure you want to clear the chat?");
+      if (confirmed) {
+        document.getElementById("chat-box").innerHTML = "";
+        showStatus("Chat cleared.", "red");
+      }
+    }
+  </script>
+</body>
+</html>

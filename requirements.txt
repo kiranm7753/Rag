@@ -1,0 +1,15 @@
+langchain
+flask
+pypdf
+faiss-cpu
+sentence-transformers
+openai
+streamlit
+langchain-community
+numpy
+python-dotenv
+python-multipart
+boto3
+flask-login
+Flask-SQLAlchemy
+flask-bcrypt

@@ -1,0 +1,30 @@
+# Ignore virtual environments
+rag_env/
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Ignore logs and test artifacts
+*.log
+*.coverage
+coverage/
+htmlcov/
+*.egg-info/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE/editor folders
+.vscode/
+.idea/
+
+# Ignore uploads if they're temporary
+uploads/
+
+# Optional: Ignore S3 vectorstore cache if not needed in image
+vectorstores/
