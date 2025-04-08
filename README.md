@@ -35,7 +35,8 @@ This system demonstrates how anyone can combine LLMs, vector search, cloud stora
 
 ## 📊 Architecture
 
-![architecture_diagram](https://github.com/user-attachments/assets/eb1e6b11-a3da-4eec-be1a-0be372f40708)
+![architecture_diagram](https://github.com/user-attachments/assets/1b9947ac-1a55-4d02-91f9-46888a545984)
+
 
 
 ## 🔐 Features
