@@ -88,7 +88,7 @@ This PDF RAG Chatbot can be adapted for a variety of **real-world use cases**:
 
 ```bash
 # Clone repo
-$ git clone https://github.com/<your-org-or-username>/rag-chatbot.git
+$ git clone https://github.com/PavanPapiReddy22/rag-chatbot.git
 $ cd rag-chatbot
 
 # Create virtual env and activate
