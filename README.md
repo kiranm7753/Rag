@@ -7,10 +7,6 @@
 - Ensure your `.env` file is correctly configured before building/running Docker.
 - EC2 instances should have at least 20 GB of storage.
 
-> ✅ Live & deployed on AWS EC2 with Docker  
-> Access the app at: **[ragchatbot.ai](http://3.85.62.17:5000/)**
-
-> Note: The registration system is for demonstration purposes only. To simulate basic validation, it accepts emails ending with @example.com. 
 
 # 🧠 PDF RAG Chatbot
 _Built with Flask + AWS + Docker + OpenAI API
